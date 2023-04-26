@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Random = UnityEngine.Random;
 using UnityEngine.InputSystem;
+using Cinemachine;
 
 [RequireComponent(typeof(SpriteRenderer))]
 public class PlayerMovement : MonoBehaviour
@@ -10,20 +11,18 @@ public class PlayerMovement : MonoBehaviour
     [Header("Movement")]
     [SerializeField] float runSpeed = 10f;
     [SerializeField] float jumpSpeed = 5f;
-    [SerializeField] float climbSpeed = 5f;
 
 
     [Header("Dash Variables")]
     public float dashingVelocity = 14f;
     public float dashingTime = 0.3f;
-
     public float dashingCooldown = 0.5f;
-
-    public float distanceBetweenImages;
     private Vector2 dashingDir;
     private bool isDashing;
     private bool canDash = true;
 
+
+    [Header ("References")]
     Animator myAnimator;
     Vector2 moveInput;
     Rigidbody2D myrigidbody;
@@ -32,6 +31,11 @@ public class PlayerMovement : MonoBehaviour
 
     float gravityAtStart;
 
+    [Header ("CameraShake")]
+    public CameraShake cameraShake;
+    public float mag = 0.3f;
+    public float tims = 0.4f;
+
     void Start()
     {
         myrigidbody = GetComponent<Rigidbody2D>();
@@ -39,7 +43,6 @@ public class PlayerMovement : MonoBehaviour
         myBodyCollider = GetComponent<CapsuleCollider2D>();
         myFeetCollider = GetComponent<BoxCollider2D>();
         gravityAtStart = myrigidbody.gravityScale;
-
     }
 
     // Update is called once per frame
@@ -47,7 +50,6 @@ public class PlayerMovement : MonoBehaviour
     {
         Run();       
         FlipSprite();
-        ClimbLadder();
 
         var dashInput = Input.GetButtonDown("Dash");
 
@@ -55,7 +57,6 @@ public class PlayerMovement : MonoBehaviour
         {
             isDashing = true;
             canDash = false;
-
             dashingDir = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
             if (dashingDir == Vector2.zero)
             {
@@ -68,9 +69,9 @@ public class PlayerMovement : MonoBehaviour
         if (isDashing)
         {
             myrigidbody.velocity = dashingDir.normalized * dashingVelocity;
+            StartCoroutine(cameraShake.Shake(tims, mag));
             return;
-        }
-        
+        } 
     }
 
     void OnMove(InputValue value)
@@ -112,20 +113,6 @@ public class PlayerMovement : MonoBehaviour
             transform.localScale = new Vector2 (Mathf.Sign(myrigidbody.velocity.x), 1f);
         }
     }
-
-    void ClimbLadder()
-    {
-        if (!myFeetCollider.IsTouchingLayers(LayerMask.GetMask("Climbing")))
-        {
-            myrigidbody.gravityScale = gravityAtStart;
-            return; 
-        }
-        
-        Vector2 climbVelocity = new Vector2 (myrigidbody.velocity.x, moveInput.y * climbSpeed);
-        myrigidbody.velocity = climbVelocity; 
-
-        myrigidbody.gravityScale = 0f; 
-    }
     
     void JumpCheck()
     {
@@ -142,6 +129,5 @@ public class PlayerMovement : MonoBehaviour
         yield return new WaitForSeconds(dashingCooldown);
         canDash = true;
     }
-
     
 }
