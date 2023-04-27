@@ -32,7 +32,6 @@ public class PlayerMovement : MonoBehaviour
     float gravityAtStart;
 
     [Header ("CameraShake")]
-    public CameraShake cameraShake;
     public float mag = 0.3f;
     public float tims = 0.4f;
 
@@ -69,7 +68,7 @@ public class PlayerMovement : MonoBehaviour
         if (isDashing)
         {
             myrigidbody.velocity = dashingDir.normalized * dashingVelocity;
-            StartCoroutine(cameraShake.Shake(tims, mag));
+    
             return;
         } 
     }
