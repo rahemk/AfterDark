@@ -4,6 +4,7 @@ using UnityEngine;
 using Random = UnityEngine.Random;
 using UnityEngine.InputSystem;
 using Cinemachine;
+using TMPro;
 
 [RequireComponent(typeof(SpriteRenderer))]
 public class PlayerMovement : MonoBehaviour
@@ -71,6 +72,7 @@ public class PlayerMovement : MonoBehaviour
     
             return;
         } 
+
     }
 
     void OnMove(InputValue value)

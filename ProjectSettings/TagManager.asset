@@ -57,6 +57,9 @@ TagManager:
   - name: Enemies
     uniqueID: 396140757
     locked: 0
+  - name: Ghost
+    uniqueID: 2266641971
+    locked: 0
   - name: Player
     uniqueID: 2076313263
     locked: 0
