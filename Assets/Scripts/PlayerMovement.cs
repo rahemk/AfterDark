@@ -4,7 +4,7 @@ using UnityEngine;
 using Random = UnityEngine.Random;
 using UnityEngine.InputSystem;
 using Cinemachine;
-using TMPro;
+
 
 [RequireComponent(typeof(SpriteRenderer))]
 public class PlayerMovement : MonoBehaviour
@@ -18,6 +18,7 @@ public class PlayerMovement : MonoBehaviour
     public float dashingVelocity = 14f;
     public float dashingTime = 0.3f;
     public float dashingCooldown = 0.5f;
+    public float maxDashVerticalVelocity = 5f;
     private Vector2 dashingDir;
     private bool isDashing;
     private bool canDash = true;
@@ -26,7 +27,7 @@ public class PlayerMovement : MonoBehaviour
     [Header ("References")]
     Animator myAnimator;
     Vector2 moveInput;
-    Rigidbody2D myrigidbody;
+    Rigidbody2D Rb;
     CapsuleCollider2D myBodyCollider;
     BoxCollider2D myFeetCollider;
 
@@ -38,11 +39,11 @@ public class PlayerMovement : MonoBehaviour
 
     void Start()
     {
-        myrigidbody = GetComponent<Rigidbody2D>();
+        Rb = GetComponent<Rigidbody2D>();
         myAnimator = GetComponent<Animator>();
         myBodyCollider = GetComponent<CapsuleCollider2D>();
         myFeetCollider = GetComponent<BoxCollider2D>();
-        gravityAtStart = myrigidbody.gravityScale;
+        gravityAtStart = Rb.gravityScale;
     }
 
     // Update is called once per frame
@@ -67,11 +68,16 @@ public class PlayerMovement : MonoBehaviour
         }
 
         if (isDashing)
-        {
-            myrigidbody.velocity = dashingDir.normalized * dashingVelocity;
-    
-            return;
-        } 
+{
+    Vector2 velocity = dashingDir.normalized * dashingVelocity;
+    if (velocity.y > maxDashVerticalVelocity)
+    {
+        velocity.y = maxDashVerticalVelocity;
+    }
+    Rb.velocity = velocity;
+    return;
+}
+
 
     }
 
@@ -89,29 +95,29 @@ public class PlayerMovement : MonoBehaviour
 
         if (value.isPressed)
         {
-            myrigidbody.velocity += new Vector2(1f, jumpSpeed);
+            Rb.velocity = new Vector2(Rb.velocity.x, jumpSpeed);
             myAnimator.SetTrigger("IsJumping");
         } 
     }
 
     public void Run()
     {
-        Vector2 PlayerVelocity = new Vector2 (moveInput.x * runSpeed, myrigidbody.velocity.y);
-        myrigidbody.velocity = PlayerVelocity;
+        Vector2 PlayerVelocity = new Vector2 (moveInput.x * runSpeed, Rb.velocity.y);
+        Rb.velocity = PlayerVelocity;
 
-        bool isMyManJumping = Mathf.Abs(myrigidbody.velocity.y) > Mathf.Epsilon;  
+        bool isMyManJumping = Mathf.Abs(Rb.velocity.y) > Mathf.Epsilon;  
 
-        bool isMyManRunning = Mathf.Abs(myrigidbody.velocity.x) > Mathf.Epsilon;
+        bool isMyManRunning = Mathf.Abs(Rb.velocity.x) > Mathf.Epsilon;
         myAnimator.SetBool("IsRunning", isMyManRunning); 
     }
 
     void FlipSprite()
     {
-        bool playerHorizontalSpeed = Mathf.Abs(myrigidbody.velocity.x) > Mathf.Epsilon;
+        bool playerHorizontalSpeed = Mathf.Abs(Rb.velocity.x) > Mathf.Epsilon;
 
         if (playerHorizontalSpeed)
         {
-            transform.localScale = new Vector2 (Mathf.Sign(myrigidbody.velocity.x), 1f);
+            transform.localScale = new Vector2 (Mathf.Sign(Rb.velocity.x), 1f);
         }
     }
     
